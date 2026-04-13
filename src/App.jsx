@@ -1,4 +1,4 @@
-import { Router, Route, useNavigate } from "@solidjs/router";
+import { Router, Route } from "@solidjs/router";
 import { lazy, Suspense, Show, createSignal } from "solid-js";
 import { observeAuth } from "./services/auth";
 import { getUserProfile } from "./services/db";
@@ -6,6 +6,7 @@ import { getUserProfile } from "./services/db";
 export const [currentUser, setCurrentUser] = createSignal(null);
 export const [userProfile, setUserProfile] = createSignal(null);
 export const [authReady, setAuthReady]     = createSignal(false);
+
 export const isAdmin  = () => userProfile()?.role === "admin";
 export const isLogged = () => !!currentUser();
 
@@ -60,11 +61,9 @@ export default function App() {
         <Route path="/signin"         component={SignIn} />
         <Route path="/signup"         component={SignUp} />
         <Route path="/reset-password" component={ResetPassword} />
-
         <Route path="/signout" component={() => <Guard><SignOut /></Guard>} />
         <Route path="/profile" component={() => <Guard><UserProfile /></Guard>} />
         <Route path="/"        component={() => <Guard><Home /></Guard>} />
-
         <Route path="*" component={() => <ErrorPage code={404} />} />
       </Suspense>
     </Router>

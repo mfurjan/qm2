@@ -18,7 +18,7 @@ export default function Home() {
         </div>
         <div class="navbar-end gap-2">
           <Show when={isAdmin()}>
-            <div class="badge badge-warning hidden sm:flex"> Admin</div>
+            <div class="badge badge-primary hidden sm:flex"> Admin</div>
           </Show>
           <div class="dropdown dropdown-end">
             <div tabIndex={0} role="button" class="btn btn-ghost btn-circle avatar placeholder">
@@ -52,7 +52,7 @@ export default function Home() {
         </div>
 
         <Show when={isAdmin()}>
-          <div class="alert alert-warning mb-6 text-sm">
+          <div class="alert alert-info mb-6 text-sm">
             <span> Prijavljeni ste kao administrator — imate pristup upravljanju kvizovima.</span>
           </div>
         </Show>
