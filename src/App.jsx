@@ -33,6 +33,11 @@ const SignOut       = lazy(() => import("./pages/SignOut"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const UserProfile   = lazy(() => import("./pages/UserProfile"));
 const ErrorPage     = lazy(() => import("./pages/Error"));
+const QuizList      = lazy(() => import("./pages/admin/QuizList"));
+const QuizForm      = lazy(() => import("./pages/admin/QuizForm"));
+const QuizPlay      = lazy(() => import("./pages/QuizPlay"));
+const QuizResult    = lazy(() => import("./pages/QuizResult"));
+const Results = lazy(() => import("./pages/Results"));
 
 function Loader() {
   return (
@@ -58,13 +63,18 @@ export default function App() {
   return (
     <Router>
       <Suspense fallback={<Loader />}>
-        <Route path="/signin"         component={SignIn} />
-        <Route path="/signup"         component={SignUp} />
-        <Route path="/reset-password" component={ResetPassword} />
-        <Route path="/signout" component={() => <Guard><SignOut /></Guard>} />
-        <Route path="/profile" component={() => <Guard><UserProfile /></Guard>} />
-        <Route path="/"        component={() => <Guard><Home /></Guard>} />
-        <Route path="*" component={() => <ErrorPage code={404} />} />
+        <Route path="/signin"          component={SignIn} />
+        <Route path="/signup"          component={SignUp} />
+        <Route path="/reset-password"  component={ResetPassword} />
+        <Route path="/signout"         component={() => <Guard><SignOut /></Guard>} />
+        <Route path="/profile"         component={() => <Guard><UserProfile /></Guard>} />
+        <Route path="/admin/quizzes"   component={() => <Guard adminOnly><QuizList /></Guard>} />
+        <Route path="/admin/quiz/:id"  component={() => <Guard adminOnly><QuizForm /></Guard>} />
+        <Route path="/quiz/result/:id" component={() => <Guard><QuizResult /></Guard>} />
+        <Route path="/quiz/:id"        component={() => <Guard><QuizPlay /></Guard>} />
+        <Route path="/"                component={() => <Guard><Home /></Guard>} />
+        <Route path="/results" component={() => <Guard><Results /></Guard>} />
+        <Route path="*"                component={() => <ErrorPage code={404} />} />
       </Suspense>
     </Router>
   );

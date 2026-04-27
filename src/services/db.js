@@ -50,6 +50,14 @@ export async function updateQuiz(quizId, data) {
 }
 
 export async function deleteQuiz(quizId) {
+  // Prvo obriši sva pitanja iz subkolekcije
+  const questionsSnap = await getDocs(
+    collection(db, "quizzes", quizId, "questions")
+  );
+  for (const q of questionsSnap.docs) {
+    await deleteDoc(doc(db, "quizzes", quizId, "questions", q.id));
+  }
+  // Onda obriši sam kviz
   await deleteDoc(doc(db, "quizzes", quizId));
 }
 
@@ -81,7 +89,9 @@ export async function saveResult(data) {
 }
 
 export async function getUserResults(userId) {
-  const snap = await getDocs(query(collection(db, "results"), orderBy("completedAt", "desc")));
+  const snap = await getDocs(
+    query(collection(db, "results"), orderBy("completedAt", "desc"))
+  );
   return snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .filter(r => r.userId === userId);
