@@ -1,5 +1,5 @@
 import { createSignal, createResource, Show, For } from "solid-js";
-import { useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { getQuiz, getQuestions, saveResult } from "../services/db";
 import { createResultSchema } from "../lib/schemas";
 import { currentUser } from "../App";
@@ -43,16 +43,8 @@ export default function QuizPlay() {
     try {
       const score = finalAnswers.reduce((sum, a) => sum + a.points, 0);
       const maxScore = questions().reduce((sum, q) => sum + q.points, 0);
-
-      const result = createResultSchema(
-        currentUser().uid,
-        params.id,
-        score,
-        maxScore,
-        finalAnswers
-      );
+      const result = createResultSchema(currentUser().uid, params.id, score, maxScore, finalAnswers);
       result.quizTitle = quiz().title;
-
       const resultId = await saveResult(result);
       navigate(`/quiz/result/${resultId}`, { replace: true });
     } catch (e) {
@@ -62,8 +54,27 @@ export default function QuizPlay() {
   }
 
   return (
-    <div class="min-h-screen bg-base-200 flex items-start justify-center p-6">
-      <div class="w-full max-w-2xl">
+    <div class="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <div class="navbar bg-gray-900 px-6">
+        <div class="navbar-start">
+          <A href="/" class="text-xl font-bold text-white">
+            Quiz <span class="text-primary">Master</span>
+          </A>
+        </div>
+        <div class="navbar-end">
+          <button
+            class="text-red-400 hover:text-red-300 text-sm font-medium"
+            onClick={() => {
+              if (confirm("Sigurno želiš odustati? Napredak će biti izgubljen.")) navigate("/");
+            }}
+          >
+            Odustani
+          </button>
+        </div>
+      </div>
+
+      <div class="max-w-2xl mx-auto px-6 py-8">
 
         <Show when={quiz.loading || questions.loading}>
           <div class="flex justify-center py-20">
@@ -72,83 +83,79 @@ export default function QuizPlay() {
         </Show>
 
         <Show when={quiz() && questions() && questions().length > 0}>
-          {/* Header */}
           <div class="mb-6">
-            <button class="btn btn-ghost btn-sm mb-2" onClick={() => navigate("/")}>
-              ← Odustani
-            </button>
-            <h1 class="text-2xl font-bold">{quiz()?.title}</h1>
-            <p class="text-base-content/60 text-sm">{quiz()?.description}</p>
+            <h1 class="text-2xl font-bold text-gray-900">{quiz()?.title}</h1>
+            <p class="text-gray-600 text-sm mt-1">{quiz()?.description}</p>
           </div>
 
-          {/* Progress */}
-          <div class="mb-4">
-            <div class="flex justify-between text-sm text-base-content/60 mb-1">
-              <span>Pitanje {current() + 1} od {questions().length}</span>
-              <span>{Math.round((current() / questions().length) * 100)}%</span>
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
+            <div class="flex justify-between text-sm text-gray-600 mb-2">
+              <span class="font-medium">Pitanje {current() + 1} od {questions().length}</span>
+              <span class="font-medium">{Math.round((current() / questions().length) * 100)}%</span>
             </div>
-            <progress
-              class="progress progress-primary w-full"
-              value={current()}
-              max={questions().length}
-            />
-          </div>
-
-          {/* Pitanje */}
-          <div class="card bg-base-100 shadow">
-            <div class="card-body gap-4">
-              <h2 class="text-lg font-semibold">
-                {questions()[current()]?.text}
-              </h2>
-
-              <div class="flex flex-col gap-3">
-                <For each={questions()[current()]?.options}>
-                  {(opt, i) => (
-                    <button
-                      class={`btn btn-outline justify-start gap-3 text-left h-auto py-3 ${
-                        selected() === i() ? "btn-primary" : ""
-                      }`}
-                      onClick={() => setSelected(i())}
-                    >
-                      <span class="badge badge-outline w-8 shrink-0">
-                        {["A", "B", "C", "D"][i()]}
-                      </span>
-                      <span class="flex-1 whitespace-normal">{opt}</span>
-                    </button>
-                  )}
-                </For>
-              </div>
-
-              <div class="flex justify-between items-center mt-2">
-                <span class="text-sm text-base-content/50">
-                  Bodovi: {questions()[current()]?.points}
-                </span>
-                <button
-                  class="btn btn-primary"
-                  disabled={selected() === null || saving()}
-                  onClick={handleNext}
-                >
-                  <Show when={saving()}>
-                    <span class="loading loading-spinner loading-sm" />
-                  </Show>
-                  {current() + 1 === questions().length ? "Završi kviz" : "Sljedeće →"}
-                </button>
-              </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+              <div
+                class="bg-gray-900 h-2 rounded-full transition-all"
+                style={{ width: `${(current() / questions().length) * 100}%` }}
+              />
             </div>
           </div>
-        </Show>
 
-        <Show when={questions() && questions().length === 0}>
-          <div class="card bg-base-100 shadow">
-            <div class="card-body text-center">
-              <p>Ovaj kviz nema pitanja.</p>
-              <button class="btn btn-primary mt-4" onClick={() => navigate("/")}>
-                Natrag
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">
+              {questions()[current()]?.text}
+            </h2>
+
+            <div class="flex flex-col gap-3 mb-6">
+              <For each={questions()[current()]?.options}>
+                {(opt, i) => (
+                  <button
+                    class={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                      selected() === i()
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 bg-white text-gray-800 hover:border-gray-400"
+                    }`}
+                    onClick={() => setSelected(i())}
+                  >
+                    <span class={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+                      selected() === i()
+                        ? "bg-white text-gray-900"
+                        : "bg-gray-100 text-gray-600"
+                    }`}>
+                      {["A", "B", "C", "D"][i()]}
+                    </span>
+                    <span class="flex-1">{opt}</span>
+                  </button>
+                )}
+              </For>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-500">
+                Bodovi: <span class="font-semibold text-gray-700">{questions()[current()]?.points}</span>
+              </span>
+              <button
+                class="btn btn-neutral rounded-full px-6"
+                disabled={selected() === null || saving()}
+                onClick={handleNext}
+              >
+                <Show when={saving()}>
+                  <span class="loading loading-spinner loading-sm" />
+                </Show>
+                {current() + 1 === questions().length ? "Završi kviz" : "Sljedeće →"}
               </button>
             </div>
           </div>
         </Show>
 
+        <Show when={questions() && questions().length === 0}>
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-12">
+            <p class="text-gray-700">Ovaj kviz nema pitanja.</p>
+            <button class="btn btn-neutral rounded-full px-6 mt-4" onClick={() => navigate("/")}>
+              Natrag
+            </button>
+          </div>
+        </Show>
       </div>
     </div>
   );
