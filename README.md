@@ -74,4 +74,3 @@ Rješavanje kviza
 - Nakon zadnjeg pitanja, korisnik klikne Završi kviz
 - Sustav izračunava rezultat i prikazuje stranicu s rezultatima: Broj točnih odgovora, ukupni broj bodova, postotak uspješnosti, poruka (npr. "Odličan rezultat!")
 
-<img src="/prototip.png" alt="opis"/>
